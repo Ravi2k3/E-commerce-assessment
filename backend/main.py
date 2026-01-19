@@ -1,43 +1,83 @@
 from fastapi import FastAPI, HTTPException, Depends, status
 from typing import List, Optional
-from .models import LoginRequest, Cart, Order, Stats
-from .store import store
-from .config import settings
+from fastapi.middleware.cors import CORSMiddleware
+from models import Cart, Order, Stats
+from store import store
+from config import settings
 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION)
 
+# enabling CORS because the frontend is on port 5173 and backend is on 8000.
+# need this for local dev communication.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.on_event("startup")
 async def startup_event():
+    # load initial data
     store.seed_data()
 
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the E-commerce Assessment API"}
 
-# Auth
-@app.post("/login")
-def login(request: LoginRequest):
-    pass
+# Cart Endpoints
 
-# Cart
+# I'm using a user_id param here to simulate different users.
+# allows me to test multiple carts without needing a full login system.
+# defaults to "demo_user" so simple calls just work.
+
 @app.post("/cart/add")
 def add_to_cart(item_id: int, quantity: int = 1, user_id: str = "demo_user"):
-    pass
+    """
+    Add item to cart or update quantity if it's already there.
+    """
+    try:
+        store.add_to_cart(user_id, item_id, quantity)
+        return {"message": "Item added to cart", "cart": store.get_cart(user_id)}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/cart")
 def get_cart(user_id: str = "demo_user"):
-    pass
+    return store.get_cart(user_id)
 
 # Checkout
+
 @app.post("/checkout")
 def checkout(discount_code: Optional[str] = None, user_id: str = "demo_user"):
-    pass
+    """
+    Submits the order.
+    Calculates totals, applies discount if the code is valid, and records the order.
+    Checks the nth order condition internally to see if a new code should be generated next.
+    """
+    try:
+        order = store.checkout(user_id, discount_code)
+        return order
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 # Admin
+
 @app.post("/admin/generate-discount")
 def generate_discount():
-    pass
+    """
+    Endpoint to manually trigger the discount generation check.
+    If the order count condition is met, it spits out a new code.
+    """
+    code = store.generate_discount_code()
+    if code:
+        return {"message": "Discount code generated", "code": code}
+    return {"message": "No discount code generated. Condition not met."}
 
 @app.get("/admin/stats")
 def get_stats():
-    pass
+    """
+    Basic sales stats for the admin.
+    """
+    return store.get_stats()

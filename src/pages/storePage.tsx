@@ -19,7 +19,7 @@ export default function StorePage() {
         // Placeholder: Will perform API call later
     }
 
-    const isFavorite = (productId: number) => false // Placeholder
+    const isFavorite = (_productId: number) => false // Placeholder
 
     const filteredProducts = products.filter(product =>
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
