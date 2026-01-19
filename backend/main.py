@@ -5,7 +5,20 @@ from models import Cart, Order, Stats
 from store import store
 from config import settings
 
-app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION)
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Lifespan context manager for the FastAPI app.
+    Handles startup and shutdown events.
+    """
+    # Startup: Load initial data
+    store.seed_data()
+    yield
+    # Shutdown: Clean up resources if needed (none for in-memory)
+
+app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION, lifespan=lifespan)
 
 # enabling CORS because the frontend is on port 5173 and backend is on 8000.
 # need this for local dev communication.
@@ -16,11 +29,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@app.on_event("startup")
-async def startup_event():
-    # load initial data
-    store.seed_data()
 
 @app.get("/")
 def read_root():
