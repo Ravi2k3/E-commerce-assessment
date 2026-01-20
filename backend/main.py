@@ -20,11 +20,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION, lifespan=lifespan)
 
-# enabling CORS because the frontend is on port 5173 and backend is on 8000.
+# enabling CORS because the frontend is on port 5173 (or 5174 if 5173 is busy) and backend is on 8000.
 # need this for local dev communication.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"], 
+    allow_origins=["http://localhost:5173", "http://localhost:5174"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
