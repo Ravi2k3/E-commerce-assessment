@@ -2,6 +2,8 @@
 
 A full-stack e-commerce application I built for an assessment. It demonstrates cart management, checkout flow, and a discount code system where every nth customer gets a 10% off coupon.
 
+![App Demo](demo/assessment.gif)
+
 ![React](https://img.shields.io/badge/React-18-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-Python-green) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
 ## What It Does
