@@ -4,7 +4,7 @@ A full-stack e-commerce application I built for an assessment. It demonstrates c
 
 ![App Demo](demo/assessment.gif)
 
-![React](https://img.shields.io/badge/React-18-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-Python-green) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![React](https://img.shields.io/badge/React-19-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-Python-green) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
 
 ## What It Does
 
@@ -19,7 +19,7 @@ A full-stack e-commerce application I built for an assessment. It demonstrates c
 
 ## Getting Started
 
-You'll need Node.js 18+ and Python 3.9+.
+You'll need Node.js 22+ and Python 3.9+.
 
 ### Start the Backend
 
