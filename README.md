@@ -19,7 +19,7 @@ A full-stack e-commerce application I built for an assessment. It demonstrates c
 
 ## Getting Started
 
-You'll need Node.js 18+ and Python 3.10+.
+You'll need Node.js 18+ and Python 3.9+.
 
 ### Start the Backend
 
