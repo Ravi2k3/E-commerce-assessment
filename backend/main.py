@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi.staticfiles import StaticFiles
 from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware
 from models import Cart, Order, Stats
@@ -19,6 +20,10 @@ async def lifespan(app: FastAPI):
     # Shutdown: Clean up resources if needed (none for in-memory)
 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION, lifespan=lifespan)
+
+# Serve product images from the backend
+# Images will be accessible at http://localhost:8000/static/products/Headphones.png
+app.mount("/static", StaticFiles(directory="."), name="static")
 
 # enabling CORS because the frontend is on port 5173 (or 5174 if 5173 is busy) and backend is on 8000.
 # need this for local dev communication.

@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom"
-import { api, type Product } from "@/lib/api"
+import { api, type Product, getImageUrl } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ShoppingCart, Star, ArrowLeft, Plus, Minus, Heart, Truck, Shield, RotateCcw, Loader2 } from "lucide-react"
@@ -100,7 +100,7 @@ export default function ProductPage() {
                             </Badge>
                         )}
                         <img
-                            src={product.image}
+                            src={getImageUrl(product.image)}
                             alt={product.name}
                             className="h-full w-full object-cover"
                         />

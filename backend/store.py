@@ -29,7 +29,7 @@ class InMemoryStore:
     def seed_data(self):
         """
         Loading up default products with full details.
-        Image paths match user-uploaded files in public/products/.
+        Images served from backend at /static/products/.
         """
         products = [
             {
@@ -37,7 +37,7 @@ class InMemoryStore:
                 "name": "Wireless Noise-Canceling Headphones",
                 "price": 299.99,
                 "originalPrice": 349.99,
-                "image": "/products/Headphones.png",
+                "image": "/static/products/Headphones.png",
                 "category": "Electronics",
                 "rating": 4.8,
                 "reviewCount": 2847,
@@ -50,7 +50,7 @@ class InMemoryStore:
                 "id": 2,
                 "name": "Smart Fitness Watch Pro",
                 "price": 199.50,
-                "image": "/products/Smartwatch.png",
+                "image": "/static/products/Smartwatch.png",
                 "category": "Electronics",
                 "rating": 4.5,
                 "reviewCount": 1523,
@@ -62,7 +62,7 @@ class InMemoryStore:
                 "id": 3,
                 "name": "Ergonomic Office Chair",
                 "price": 450.00,
-                "image": "/products/Chair.png",
+                "image": "/static/products/Chair.png",
                 "category": "Furniture",
                 "rating": 4.9,
                 "reviewCount": 892,
@@ -74,7 +74,7 @@ class InMemoryStore:
                 "id": 4,
                 "name": "Premium Cotton T-Shirt",
                 "price": 25.00,
-                "image": "/products/Shirt.png",
+                "image": "/static/products/Shirt.png",
                 "category": "Clothing",
                 "rating": 4.2,
                 "reviewCount": 3421,
@@ -86,7 +86,7 @@ class InMemoryStore:
                 "id": 5,
                 "name": "Stainless Steel Water Bottle",
                 "price": 35.00,
-                "image": "/products/Bottle.png",
+                "image": "/static/products/Bottle.png",
                 "category": "Accessories",
                 "rating": 4.7,
                 "reviewCount": 2156,
@@ -99,7 +99,7 @@ class InMemoryStore:
                 "name": "Leather Weekend Bag",
                 "price": 150.00,
                 "originalPrice": 199.00,
-                "image": "/products/Bag.png",
+                "image": "/static/products/Bag.png",
                 "category": "Accessories",
                 "rating": 4.6,
                 "reviewCount": 678,
@@ -112,7 +112,7 @@ class InMemoryStore:
                 "id": 7,
                 "name": "4K Ultra HD Monitor",
                 "price": 399.99,
-                "image": "/products/Monitor.png",
+                "image": "/static/products/Monitor.png",
                 "category": "Electronics",
                 "rating": 4.4,
                 "reviewCount": 1892,
@@ -124,7 +124,7 @@ class InMemoryStore:
                 "id": 8,
                 "name": "Mechanical Gaming Keyboard",
                 "price": 129.99,
-                "image": "/products/Keyboard.png",
+                "image": "/static/products/Keyboard.png",
                 "category": "Electronics",
                 "rating": 4.8,
                 "reviewCount": 3567,
@@ -136,7 +136,7 @@ class InMemoryStore:
                 "id": 9,
                 "name": "Organic Face Serum",
                 "price": 45.00,
-                "image": "/products/Serum.png",
+                "image": "/static/products/Serum.png",
                 "category": "Beauty",
                 "rating": 4.9,
                 "reviewCount": 4521,
@@ -148,7 +148,7 @@ class InMemoryStore:
                 "id": 10,
                 "name": "Running Shoes Gen 2",
                 "price": 89.95,
-                "image": "/products/Shoe.png",
+                "image": "/static/products/Shoe.png",
                 "category": "Footwear",
                 "rating": 4.3,
                 "reviewCount": 2789,

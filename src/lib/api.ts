@@ -1,7 +1,12 @@
 // API service for backend communication
 
-const BASE_URL = "http://localhost:8000"
+export const BASE_URL = "http://localhost:8000"
 const USER_ID = "demo_user" // Simplified - no auth per assessment
+
+// Helper to get full image URL from backend
+export function getImageUrl(path: string): string {
+    return `${BASE_URL}${path}`
+}
 
 interface CartItem {
     item_id: number

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { api, type Product } from "@/lib/api"
+import { api, type Product, getImageUrl } from "@/lib/api"
 import { Badge } from "@/components/ui/badge"
 import { Star, Heart, Plus, Loader2 } from "lucide-react"
 import Header from "@/components/Header"
@@ -107,7 +107,7 @@ export default function StorePage() {
                                                 </div>
                                             )}
                                             <img
-                                                src={product.image}
+                                                src={getImageUrl(product.image)}
                                                 alt={product.name}
                                                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                             />

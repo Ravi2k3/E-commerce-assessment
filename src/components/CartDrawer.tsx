@@ -2,7 +2,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useCart } from "@/context/CartContext"
-import { api, type Product } from "@/lib/api"
+import { api, type Product, getImageUrl } from "@/lib/api"
 import { useState, useEffect } from "react"
 import { Loader2, ShoppingBag, Tag, Sparkles, Gift, X, Trash2, Check } from "lucide-react"
 import { toast } from "sonner"
@@ -287,7 +287,7 @@ export function CartDrawer() {
                                 return (
                                     <div key={item.item_id} className={`flex gap-4 p-4 bg-gray-50 rounded-xl ${isRemoving ? 'opacity-50' : ''}`}>
                                         <div className="h-20 w-20 bg-white rounded-lg overflow-hidden flex-shrink-0 border">
-                                            <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                                            <img src={getImageUrl(product.image)} alt={product.name} className="h-full w-full object-cover" />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <h4 className="font-medium text-sm line-clamp-2 mb-2">{product.name}</h4>
