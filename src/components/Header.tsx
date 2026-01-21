@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom"
-import { ShoppingCart, Search } from "lucide-react"
+import { ShoppingCart, Search, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useCart } from "@/context/CartContext"
 
 interface HeaderProps {
     searchQuery?: string
@@ -10,7 +11,9 @@ interface HeaderProps {
 }
 
 export default function Header({ searchQuery, onSearchChange, showSearch = false }: HeaderProps) {
-    const itemCount = 0 // Placeholder until backend is connected
+    const { cart, setIsCartOpen } = useCart()
+
+    const itemCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-white/95 dark:bg-zinc-950/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-zinc-950/60">
@@ -34,8 +37,19 @@ export default function Header({ searchQuery, onSearchChange, showSearch = false
                     </div>
                 )}
 
-                <nav className="flex gap-4 flex-shrink-0">
-                    <Button variant="ghost" size="icon" className="relative">
+                <nav className="flex gap-2 flex-shrink-0">
+                    <Link to="/admin">
+                        <Button variant="ghost" size="icon">
+                            <LayoutDashboard className="h-5 w-5" />
+                            <span className="sr-only">Admin</span>
+                        </Button>
+                    </Link>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="relative"
+                        onClick={() => setIsCartOpen(true)}
+                    >
                         <ShoppingCart className="h-5 w-5" />
                         {itemCount > 0 && (
                             <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-medium">
@@ -64,3 +78,4 @@ export default function Header({ searchQuery, onSearchChange, showSearch = false
         </header>
     )
 }
+
