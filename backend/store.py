@@ -1,4 +1,5 @@
 from typing import List, Dict, Optional
+import threading
 from models import Item, Order, DiscountCode, Cart, CartItem
 
 class InMemoryStore:
@@ -11,9 +12,10 @@ class InMemoryStore:
     
     couple things to note:
     1. if you restart the server, data is gone.
-    2. not thread-safe, so wouldn't work well with multiple workers.
+    2. uses a lock for thread-safety with multiple workers.
     """
     def __init__(self):
+        self._lock = threading.RLock()  # reentrant lock for thread-safety
         self.items: Dict[int, Item] = {}
         
         # using a simple user_id string as the key here.
@@ -163,9 +165,10 @@ class InMemoryStore:
 
     def get_cart(self, user_id: str) -> Cart:
         # creates a new cart if this user id hasn't been seen before
-        if user_id not in self.carts:
-            self.carts[user_id] = Cart(items=[])
-        return self.carts[user_id]
+        with self._lock:
+            if user_id not in self.carts:
+                self.carts[user_id] = Cart(items=[])
+            return self.carts[user_id]
         
     def add_to_cart(self, user_id: str, item_id: int, quantity: int):
         """
@@ -173,33 +176,35 @@ class InMemoryStore:
         Just checking if the item exists, then updating quantity.
         Skipping inventory checks for now to keep it simple.
         """
-        cart = self.get_cart(user_id)
-        
-        if item_id not in self.items:
-            raise ValueError(f"Item {item_id} not found")
+        with self._lock:
+            cart = self.get_cart(user_id)
             
-        existing_item = next((item for item in cart.items if item.item_id == item_id), None)
-        
-        if existing_item:
-            existing_item.quantity += quantity
-            # remove it if quantity goes to zero or less
-            if existing_item.quantity <= 0:
-                cart.items.remove(existing_item)
-        else:
-            if quantity > 0:
-                cart.items.append(CartItem(item_id=item_id, quantity=quantity))
+            if item_id not in self.items:
+                raise ValueError(f"Item {item_id} not found")
+                
+            existing_item = next((item for item in cart.items if item.item_id == item_id), None)
+            
+            if existing_item:
+                existing_item.quantity += quantity
+                # remove it if quantity goes to zero or less
+                if existing_item.quantity <= 0:
+                    cart.items.remove(existing_item)
+            else:
+                if quantity > 0:
+                    cart.items.append(CartItem(item_id=item_id, quantity=quantity))
 
     def remove_from_cart(self, user_id: str, item_id: int):
         """
         Remove an item completely from the cart.
         """
-        cart = self.get_cart(user_id)
-        existing_item = next((item for item in cart.items if item.item_id == item_id), None)
-        
-        if not existing_item:
-            raise ValueError(f"Item {item_id} not in cart")
-        
-        cart.items.remove(existing_item)
+        with self._lock:
+            cart = self.get_cart(user_id)
+            existing_item = next((item for item in cart.items if item.item_id == item_id), None)
+            
+            if not existing_item:
+                raise ValueError(f"Item {item_id} not in cart")
+            
+            cart.items.remove(existing_item)
                 
     def checkout(self, user_id: str, discount_code: Optional[str] = None) -> Order:
         """
@@ -207,78 +212,82 @@ class InMemoryStore:
         Calculates the final total, applies any discounts, transfers the 
         items to an Order object, and then wipes the cart.
         """
-        cart = self.get_cart(user_id)
-        if not cart.items:
-            raise ValueError("Cart is empty")
-            
-        total_amount = 0.0
-        for cart_item in cart.items:
-            item = self.items[cart_item.item_id]
-            total_amount += item.price * cart_item.quantity
-            
-        discount_amount = 0.0
-        if discount_code:
-            if discount_code in self.discount_codes and self.discount_codes[discount_code].is_valid:
-                discount_amount = total_amount * 0.10 # 10% off
+        with self._lock:
+            cart = self.get_cart(user_id)
+            if not cart.items:
+                raise ValueError("Cart is empty")
                 
-                # requirements said code can be used once.
-                # easiest way to enforce that is to just delete it after use.
-                del self.discount_codes[discount_code]
-            else:
-                raise ValueError("Invalid discount code")
+            total_amount = 0.0
+            for cart_item in cart.items:
+                item = self.items[cart_item.item_id]
+                total_amount += item.price * cart_item.quantity
                 
-        final_amount = total_amount - discount_amount
-        
-        order = Order(
-            id=len(self.orders) + 1,
-            user_id=user_id,
-            items=list(cart.items), # copy the list so we have a snapshot
-            total_amount=total_amount,
-            discount_code=discount_code,
-            discount_amount=discount_amount,
-            final_amount=final_amount
-        )
-        
-        self.orders.append(order)
-        self.order_count += 1
-        
-        # empty the cart now that order is placed
-        cart.items = []
-        
-        return order
+            discount_amount = 0.0
+            if discount_code:
+                if discount_code in self.discount_codes and self.discount_codes[discount_code].is_valid:
+                    discount_amount = total_amount * 0.10 # 10% off
+                    
+                    # requirements said code can be used once.
+                    # easiest way to enforce that is to just delete it after use.
+                    del self.discount_codes[discount_code]
+                else:
+                    raise ValueError("Invalid discount code")
+                    
+            final_amount = total_amount - discount_amount
+            
+            order = Order(
+                id=len(self.orders) + 1,
+                user_id=user_id,
+                items=list(cart.items), # copy the list so we have a snapshot
+                total_amount=total_amount,
+                discount_code=discount_code,
+                discount_amount=discount_amount,
+                final_amount=final_amount
+            )
+            
+            self.orders.append(order)
+            self.order_count += 1
+            
+            # empty the cart now that order is placed
+            cart.items = []
+            
+            return order
         
     def generate_discount_code(self) -> Optional[str]:
         """
         Checks if we hit the nth order milestone.
         If we did, we generate a new code and store it.
         """
-        if self.order_count > 0 and self.order_count % self.nth_order_trigger == 0:
-            code = f"DISCOUNT10-{self.order_count}"
-            self.discount_codes[code] = DiscountCode(code=code)
-            return code
-        return None
+        with self._lock:
+            if self.order_count > 0 and self.order_count % self.nth_order_trigger == 0:
+                code = f"DISCOUNT10-{self.order_count}"
+                self.discount_codes[code] = DiscountCode(code=code)
+                return code
+            return None
 
     def validate_discount_code(self, code: str) -> bool:
         """
         Check if a discount code exists and is valid.
         """
-        return code in self.discount_codes and self.discount_codes[code].is_valid
+        with self._lock:
+            return code in self.discount_codes and self.discount_codes[code].is_valid
         
     def get_stats(self) -> Dict:
         """
         Simple aggregation for the admin view.
         """
-        total_items = sum(sum(item.quantity for item in order.items) for order in self.orders)
-        total_purchase = sum(order.final_amount for order in self.orders)
-        discount_list = [order.discount_code for order in self.orders if order.discount_code]
-        total_discount = sum(order.discount_amount for order in self.orders)
-        
-        return {
-            "total_orders": len(self.orders),
-            "total_items_purchased": total_items,
-            "total_purchase_amount": total_purchase,
-            "discount_codes": discount_list,
-            "total_discount_amount": total_discount
-        }
+        with self._lock:
+            total_items = sum(sum(item.quantity for item in order.items) for order in self.orders)
+            total_purchase = sum(order.final_amount for order in self.orders)
+            discount_list = [order.discount_code for order in self.orders if order.discount_code]
+            total_discount = sum(order.discount_amount for order in self.orders)
+            
+            return {
+                "total_orders": len(self.orders),
+                "total_items_purchased": total_items,
+                "total_purchase_amount": total_purchase,
+                "discount_codes": discount_list,
+                "total_discount_amount": total_discount
+            }
 
 store = InMemoryStore()

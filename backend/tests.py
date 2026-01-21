@@ -166,3 +166,41 @@ def test_admin_stats():
     assert stats["total_items_purchased"] == 2
     # Total revenue should match price * 2
     assert stats["total_purchase_amount"] == 299.99 * 2
+
+
+def test_concurrency_checkout():
+    """
+    Concurrency Test:
+    Simulates 10 users checking out simultaneously.
+    Verifies that order count increments correctly and no race conditions occur.
+    """
+    import concurrent.futures
+    
+    # 1. Setup: Add items to 10 different user carts
+    dataset = [f"conc_user_{i}" for i in range(10)]
+    
+    for uid in dataset:
+        client.post(f"/cart/add?item_id=1&quantity=1&user_id={uid}")
+        
+    initial_orders = len(store.orders)
+    
+    # 2. Parallel Execution: 10 threads hitting /checkout at once
+    def perform_checkout(uid):
+        return client.post(f"/checkout?user_id={uid}")
+        
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        results = list(executor.map(perform_checkout, dataset))
+        
+    # 3. Verification
+    
+    # All 10 requests should succeed
+    for res in results:
+        assert res.status_code == 200
+        
+    # Order count should have increased EXACTLY by 10
+    final_orders = len(store.orders)
+    assert final_orders == initial_orders + 10
+    
+    # Verify unique Order IDs
+    order_ids = [res.json()['id'] for res in results]
+    assert len(set(order_ids)) == 10

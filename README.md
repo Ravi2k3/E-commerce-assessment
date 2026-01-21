@@ -150,6 +150,14 @@ Based on the FAQ in the assignment:
 - Each code works **once** — after someone uses it, it's gone
 - The discount is **10% off the entire order**, not individual items
 
+### Thread Safety
+
+Even though this uses an in-memory store, I implemented **thread safety** using `threading.RLock` (Reentrant Lock). This ensures that concurrent requests to critical endpoints (like `add_to_cart` or `checkout`) don't cause race conditions or data corruption, mimicking how a real database would handle transactions.
+
+### Asset Management
+
+Product images are hosted by the **FastAPI backend** (served as static files) rather than the frontend. The frontend uses a helper `getImageUrl()` to construct the full URL. This keeps asset management centralized in the backend, similar to how a cloud storage bucket would work in production.
+
 ---
 
 ## Running Tests
@@ -180,7 +188,7 @@ The tests cover:
 | Admin: generate discount | ✅ | `POST /admin/generate-discount` |
 | Admin: list stats | ✅ | `GET /admin/stats` |
 | UI (stretch goal) | ✅ | Full React app |
-| In-memory store | ✅ | `InMemoryStore` class |
+| In-memory store | ✅ | `InMemoryStore` class (Thread-safe!) |
 | Code quality | ✅ | TypeScript + typed Python |
 | Comments & docs | ✅ | You're reading them! |
 | Unit tests | ✅ | Pytest suite |
@@ -195,7 +203,8 @@ backend/
 ├── models.py        # Data models
 ├── store.py         # In-memory storage + business logic
 ├── config.py        # Settings
-└── tests.py         # Unit tests
+├── tests.py         # Unit tests
+└── products/        # Product images (served via /static)
 
 src/
 ├── components/
@@ -213,7 +222,7 @@ src/
 └── App.tsx
 
 public/
-└── products/        # Product images
+└── vite.svg         # Frontend assets
 ```
 
 ---
