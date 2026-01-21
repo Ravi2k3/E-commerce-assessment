@@ -74,6 +74,18 @@ class InMemoryStore:
         else:
             if quantity > 0:
                 cart.items.append(CartItem(item_id=item_id, quantity=quantity))
+
+    def remove_from_cart(self, user_id: str, item_id: int):
+        """
+        Remove an item completely from the cart.
+        """
+        cart = self.get_cart(user_id)
+        existing_item = next((item for item in cart.items if item.item_id == item_id), None)
+        
+        if not existing_item:
+            raise ValueError(f"Item {item_id} not in cart")
+        
+        cart.items.remove(existing_item)
                 
     def checkout(self, user_id: str, discount_code: Optional[str] = None) -> Order:
         """
@@ -131,6 +143,12 @@ class InMemoryStore:
             self.discount_codes[code] = DiscountCode(code=code)
             return code
         return None
+
+    def validate_discount_code(self, code: str) -> bool:
+        """
+        Check if a discount code exists and is valid.
+        """
+        return code in self.discount_codes and self.discount_codes[code].is_valid
         
     def get_stats(self) -> Dict:
         """

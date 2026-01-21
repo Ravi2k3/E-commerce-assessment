@@ -55,6 +55,25 @@ def add_to_cart(item_id: int, quantity: int = 1, user_id: str = "demo_user"):
 def get_cart(user_id: str = "demo_user"):
     return store.get_cart(user_id)
 
+@app.delete("/cart/remove")
+def remove_from_cart(item_id: int, user_id: str = "demo_user"):
+    """
+    Remove an item completely from the cart.
+    """
+    try:
+        store.remove_from_cart(user_id, item_id)
+        return {"message": "Item removed from cart", "cart": store.get_cart(user_id)}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/discount/validate")
+def validate_discount_code(code: str):
+    """
+    Check if a discount code is valid (exists and hasn't been used).
+    """
+    is_valid = store.validate_discount_code(code)
+    return {"code": code, "valid": is_valid}
+
 # Checkout
 
 @app.post("/checkout")
