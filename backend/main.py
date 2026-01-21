@@ -34,6 +34,24 @@ app.add_middleware(
 def read_root():
     return {"message": "Welcome to the E-commerce Assessment API"}
 
+# Product Endpoints
+
+@app.get("/products")
+def get_products():
+    """
+    Get all products.
+    """
+    return list(store.items.values())
+
+@app.get("/products/{product_id}")
+def get_product(product_id: int):
+    """
+    Get a single product by ID.
+    """
+    if product_id not in store.items:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return store.items[product_id]
+
 # Cart Endpoints
 
 # I'm using a user_id param here to simulate different users.

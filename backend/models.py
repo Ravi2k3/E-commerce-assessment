@@ -8,12 +8,20 @@ from pydantic import BaseModel
 class Item(BaseModel):
     """
     Product definition. 
-    This needs to match the shape of the product data in the frontend 
-    so we can sync them up easily.
+    Full product data to match frontend display requirements.
     """
     id: int
     name: str
     price: float
+    originalPrice: Optional[float] = None
+    image: str
+    category: str
+    rating: float
+    reviewCount: int
+    description: str
+    features: List[str]
+    stock: int
+    sale: bool = False
 
 class CartItem(BaseModel):
     """
