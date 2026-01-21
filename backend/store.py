@@ -274,6 +274,7 @@ class InMemoryStore:
         total_discount = sum(order.discount_amount for order in self.orders)
         
         return {
+            "total_orders": len(self.orders),
             "total_items_purchased": total_items,
             "total_purchase_amount": total_purchase,
             "discount_codes": discount_list,
